@@ -15,6 +15,11 @@ npm i -g jsjq
 jsjq '.data.map(x => x*2)' '{"data": [1, 2, 3]}'
 ```
 
+Pipe usage:
+```bash
+echo '{"data": [1, 2, 3]}' | jsjq '.data.map(x => x*2)' 
+```
+
 Custom object methods (see options):
 ```bash
 jsjq '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
