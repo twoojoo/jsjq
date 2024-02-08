@@ -5,7 +5,6 @@
 Usage with npx:
 ```bash
 npx jsjq '.data.map(x => x*2)' '{"data": [1, 2, 3]}'
-
 # output: [2, 4, 6]
 ```
 
