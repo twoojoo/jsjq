@@ -5,6 +5,17 @@
   "bin": {
     "jsjq": "index.js"
   },
+  "keywords": [
+    "json",
+    "jq",
+    "cli",
+    "ECMAScript",
+    "functional",
+    "fluent",
+    "query",
+    "search",
+    "navigate"
+  ],
   "author": "twoojoo",
   "preferGlobal": true,
   "license": "ISC",
