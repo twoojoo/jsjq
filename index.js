@@ -100,7 +100,7 @@ function printHelp() {
 	console.log(`\tjsjq <query> <JSON string | file path> [...options]`)
 	console.log()
 	console.log(`example:`)
-	console.log(`\tjsjq '.data.map(x => x*2)'' '{"data": [1, 2, 3]}' --compact-output`)
+	console.log(`\tjsjq '.data.map(x => x*2)' '{"data": [1, 2, 3]}' --compact-output`)
 	console.log()
 	console.log("options:")
 	console.log("\t" + Object.values(Options).map(x => {
