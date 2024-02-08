@@ -38,7 +38,8 @@ const json = args._[1]
 
 if (!query) throw Error("missing query argument")
 if (!json) throw Error("missing json argument")
-if (!query.startsWith(".")) throw Error("query must start with a \".\"")
+if (!query.startsWith(".") && !query.startsWith("[")) 
+	throw Error("query must start with either \".\" or \"[\"")
 
 const isJsonFile = isValidFilePath(json)
 
