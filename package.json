@@ -6,6 +6,7 @@
     "jsjq": "index.js"
   },
   "author": "twoojoo",
+  "preferGlobal": true,
   "license": "ISC",
   "description": "jq with ECMAScript syntax",
   "dependencies": {
