@@ -16,6 +16,18 @@ npm i -g jsjq
 jsjq '.data.map(x => x*2)' '{"data": [1, 2, 3]}'
 ```
 
+Custom object methods:
+```bash
+jsjq '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
+# output: [ 'a', 'b', 'c' ]
+
+jsjq '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
+# output: [ 1, 2, 3 ]
+
+jsjq '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
+# output: [ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ] ]
+```
+
 Options:
 
 - **-c, --compact-output**    compact instead of pretty-printed output;

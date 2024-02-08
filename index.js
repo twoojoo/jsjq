@@ -13,6 +13,8 @@ const Options = {
 	HELP: ["-h", "--help", Boolean, "show the help"]
 }
 
+const CUSTOM_METHODS = ["listValues", "listKeys", "listEntries"]
+
 const argOptions = Object.values(Options).reduce((opts, o) => {
 	o.slice(undefined, -2).forEach(name => { 
 		const optKind = o[o.length - 2]
@@ -55,6 +57,8 @@ try {
 	throw Error(kind + " is an invalid JSON")
 }
 
+addObjectMethods(OBJECT)
+
 const print = getOption(Options.TYPE) 
 	? (x) => process.stdout.write(getTypeOf(x) + "\n") 
 	: getOption(Options.COMPACT_OUTPUT)
@@ -71,6 +75,7 @@ const print = getOption(Options.TYPE)
 			: (x) => process.stdout.write(util.inspect(x, null, null, true) + "\n") 
 
 if (query === ".") {
+	clearObject(OBJECT)
 	print(OBJECT)
 	process.exit(0)
 }
@@ -78,6 +83,7 @@ if (query === ".") {
 const result = eval(`OBJECT${query};`)
 
 if (result !== undefined) {  
+	clearObject(OBJECT)
 	print(result)
 }
 
@@ -114,6 +120,7 @@ function printHelp() {
 
 }
 
+/**add array to the set of types*/
 function getTypeOf(x) {
 	let type = typeof x
 
@@ -123,3 +130,69 @@ function getTypeOf(x) {
 
 	return type
 }
+
+/**add custom objet methods*/
+function addObjectMethods(obj, path = "") {
+	if (typeof obj !== "object") {
+		return
+	}
+
+	if (Array.isArray(obj)) {
+		for (const idx in obj) {
+			const newPath = path + `[${idx}]`
+			addObjectMethods(obj[idx], newPath)	
+		}
+	} else {
+		if (obj.listKeys === undefined) {
+			obj.listKeys = () => {
+				return Object.keys(obj).filter((key) => !CUSTOM_METHODS.includes(key))
+			} 
+		} else {
+			console.error("failed to set listKeys method at ", path)
+		}
+
+		if (obj.listEntries === undefined) {
+			obj.listEntries = () => {
+				return Object.entries(obj).filter(([key, _]) => !CUSTOM_METHODS.includes(key))
+			} 
+		} else {
+			console.error("failed to set ListEntries method at ", path)
+		}
+
+		if (obj.listValues === undefined) {
+			obj.listValues = () => {
+				return Object.entries(obj).filter(([key, _]) => !CUSTOM_METHODS.includes(key)).map(([_, val]) => val)
+			} 
+		} else {
+			console.error("failed to set ListValues method at ", path)
+		}
+
+		for (const prop in obj) {
+			if (CUSTOM_METHODS.includes(prop)) continue
+
+			path += "." + prop
+			addObjectMethods(obj[prop], path)	
+		}
+	}
+}
+
+/**cleanup custom methods*/
+function clearObject(obj) {
+	if (typeof obj !== "object") {
+		return
+	}
+
+	if (Array.isArray(obj)) {
+		for (const idx in obj) {
+			clearObject(obj[idx])	
+		}
+	} else {
+		for (const key of CUSTOM_METHODS) {
+			delete obj[key]
+		}
+
+		for (const prop in obj) {
+			clearObject(obj[prop])	
+		}
+	} 
+} 
