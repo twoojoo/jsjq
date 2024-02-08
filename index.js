@@ -6,6 +6,7 @@ const path = require('node:path');
 const util = require("node:util");
 
 const Options = {
+	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-methods", Boolean, "disable the usage of custom object methods (prevents object fields override)"],
 	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
 	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
 	TYPE: ["-t", "--type", Boolean, "print the type of the value instead of the value itself"],
@@ -13,7 +14,7 @@ const Options = {
 	HELP: ["-h", "--help", Boolean, "show the help"]
 }
 
-const CUSTOM_METHODS = ["listValues", "listKeys", "listEntries"]
+const CUSTOM_METHODS_NAMES = ["listValues", "listKeys", "listEntries"]
 
 const argOptions = Object.values(Options).reduce((opts, o) => {
 	o.slice(undefined, -2).forEach(name => { 
@@ -34,7 +35,6 @@ if (getOption(Options.VERSION)) {
 	console.log(pJSON.version)
 	process.exit(0)
 }
-
 
 const query = args._[0]
 const json = args._[1]
@@ -133,6 +133,10 @@ function getTypeOf(x) {
 
 /**add custom objet methods*/
 function addObjectMethods(obj, path = "") {
+	if (getOption(Options.DISABLE_CUSTOM_METHODS)) {
+		return
+	}
+
 	if (typeof obj !== "object") {
 		return
 	}
@@ -143,32 +147,20 @@ function addObjectMethods(obj, path = "") {
 			addObjectMethods(obj[idx], newPath)	
 		}
 	} else {
-		if (obj.listKeys === undefined) {
-			obj.listKeys = () => {
-				return Object.keys(obj).filter((key) => !CUSTOM_METHODS.includes(key))
-			} 
-		} else {
-			console.error("failed to set listKeys method at ", path)
-		}
+		obj.listKeys = () => {
+			return Object.keys(obj).filter((key) => !CUSTOM_METHODS_NAMES.includes(key))
+		} 
 
-		if (obj.listEntries === undefined) {
-			obj.listEntries = () => {
-				return Object.entries(obj).filter(([key, _]) => !CUSTOM_METHODS.includes(key))
-			} 
-		} else {
-			console.error("failed to set ListEntries method at ", path)
-		}
+		obj.listEntries = () => {
+			return Object.entries(obj).filter(([key, _]) => !CUSTOM_METHODS_NAMES.includes(key))
+		} 
 
-		if (obj.listValues === undefined) {
-			obj.listValues = () => {
-				return Object.entries(obj).filter(([key, _]) => !CUSTOM_METHODS.includes(key)).map(([_, val]) => val)
-			} 
-		} else {
-			console.error("failed to set ListValues method at ", path)
-		}
-
+		obj.listValues = () => {
+			return Object.entries(obj).filter(([key, _]) => !CUSTOM_METHODS_NAMES.includes(key)).map(([_, val]) => val)
+		} 
+		
 		for (const prop in obj) {
-			if (CUSTOM_METHODS.includes(prop)) continue
+			if (CUSTOM_METHODS_NAMES.includes(prop)) continue
 
 			path += "." + prop
 			addObjectMethods(obj[prop], path)	
@@ -178,6 +170,10 @@ function addObjectMethods(obj, path = "") {
 
 /**cleanup custom methods*/
 function clearObject(obj) {
+	if (getOption(Options.DISABLE_CUSTOM_METHODS)) {
+		return
+	}
+
 	if (typeof obj !== "object") {
 		return
 	}
@@ -187,7 +183,7 @@ function clearObject(obj) {
 			clearObject(obj[idx])	
 		}
 	} else {
-		for (const key of CUSTOM_METHODS) {
+		for (const key of CUSTOM_METHODS_NAMES) {
 			delete obj[key]
 		}
 
@@ -195,4 +191,4 @@ function clearObject(obj) {
 			clearObject(obj[prop])	
 		}
 	} 
-} 
+}
