@@ -1,6 +1,6 @@
 # jsjq - jq with ECMAScript syntax
 
-> it uses **eval()** to run your code, be warned
+> it uses **eval()** to run your code, be warned (code is checked using [safe-eval](https://www.npmjs.com/package/safe-eval))
 
 Usage with npx:
 ```bash
