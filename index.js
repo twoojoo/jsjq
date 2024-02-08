@@ -8,6 +8,7 @@ const util = require("node:util");
 const Options = {
 	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
 	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
+	TYPE: ["-t", "--type", Boolean, "print the JS type of the value instead of the value itself"],
 	VERSION: ["-v", "--version", Boolean, "show the version"],
 	HELP: ["-h", "--help", Boolean, "show the help"]
 }
@@ -54,18 +55,20 @@ try {
 	throw Error(kind + " is an invalid JSON")
 }
 
-const print = getOption(Options.COMPACT_OUTPUT) === true
-	? (x) => process.stdout.write(getOption(Options.RAW_OUTPUT) 
-		? typeof x == "object" 
-			? util.inspect(x, { compact: true, colors: false, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
-			: x.toString()
-		: util.inspect(x, { compact: true, colors: true, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
-	) 
-	: getOption(Options.RAW_OUTPUT) 
-		? (x) => typeof x == "object" 
-			? process.stdout.write(util.inspect(x, null, null, true) + "\n") 
-			: process.stdout.write(x.toString() + "\n") 
-		: (x) => process.stdout.write(util.inspect(x, null, null, true) + "\n") 
+const print = getOption(Options.TYPE) 
+	? (x) => process.stdout.write(typeof x + "\n") 
+	: getOption(Options.COMPACT_OUTPUT)
+		? (x) => process.stdout.write(getOption(Options.RAW_OUTPUT) 
+			? typeof x == "object" 
+				? util.inspect(x, { compact: true, colors: false, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
+				: x.toString()
+			: util.inspect(x, { compact: true, colors: true, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
+		) 
+		: getOption(Options.RAW_OUTPUT) 
+			? (x) => typeof x == "object" 
+				? process.stdout.write(util.inspect(x, null, null, true) + "\n") 
+				: process.stdout.write(x.toString() + "\n") 
+			: (x) => process.stdout.write(util.inspect(x, null, null, true) + "\n") 
 
 if (query === ".") {
 	print(OBJECT)

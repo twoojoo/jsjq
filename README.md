@@ -20,5 +20,6 @@ Options:
 
 - **-c, --compact-output**    compact instead of pretty-printed output;
 - **-r, --raw-output**        output strings without escapes and quotes;
+- **-t, --type**			  print the JS type of the value instead of the value itself;
 - **-v, --version** 		  show the version;
 - **-h, --help**	          show the help;
