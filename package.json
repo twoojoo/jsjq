@@ -3,7 +3,7 @@
   "version": "0.0.3",
   "main": "index.js",
   "bin": {
-    "jjq": "index.js"
+    "jsjq": "index.js"
   },
   "author": "twoojoo",
   "license": "ISC",
