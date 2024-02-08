@@ -1,0 +1,13 @@
+{
+	"name": "hello-world",
+	"num": 123,
+	"bool": false,
+	"array": [
+		"1",
+		2,
+		true
+	],
+	"object": {
+		"field": "value"
+	}
+}

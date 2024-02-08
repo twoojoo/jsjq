@@ -1,0 +1,14 @@
+{
+  "name": "jsjq",
+  "version": "0.0.1",
+  "main": "index.js",
+  "bin": {
+    "jjq": "index.js"
+  },
+  "author": "twoojoo",
+  "license": "ISC",
+  "description": "js jq",
+  "dependencies": {
+    "arg": "^5.0.2"
+  }
+}
