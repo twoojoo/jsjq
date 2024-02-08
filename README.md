@@ -15,3 +15,7 @@ npm i -g jsjq
 
 jsjq ".data.map(x => x*2)" '{"data": [1, 2, 3]}'
 ```
+
+Options:
+
+- **-r | --raw-output**
