@@ -18,4 +18,7 @@ jsjq ".data.map(x => x*2)" '{"data": [1, 2, 3]}'
 
 Options:
 
-- **-r | --raw-output**
+- **-c, --compact-output**    compact instead of pretty-printed output;
+- **-r, --raw-output**        output strings without escapes and quotes;
+- **-v, --version** 		  show the version;
+- **-h, --help**	          show the help;
