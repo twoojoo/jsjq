@@ -115,7 +115,7 @@ function printHelp() {
 }
 
 function getTypeOf(x) {
-	const type = typeof x
+	let type = typeof x
 
 	if (type == "object" && Array.isArray(x)) {
 		type = "array"
