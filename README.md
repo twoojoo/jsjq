@@ -1,4 +1,4 @@
-# jsjq - jq with ECMASctipt syntax
+# jsjq - jq with ECMAScript syntax
 
 > it uses **eval()** to run your code, be warned
 
