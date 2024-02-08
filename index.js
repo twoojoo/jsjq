@@ -37,54 +37,67 @@ if (getOption(Options.VERSION)) {
 }
 
 const query = args._[0]
-const json = args._[1]
+let json = args._[1] || ""
 
 if (!query) throw Error("missing query argument")
-if (!json) throw Error("missing json argument")
 if (!query.startsWith(".") && !query.startsWith("[")) 
 	throw Error("query must start with either \".\" or \"[\"")
 
-const isJsonFile = isValidFilePath(json)
-
-let OBJECT
-let kind
-try {
-	kind = isJsonFile ? "file" : "string"
-	OBJECT = isJsonFile
-		? JSON.parse(fs.readFileSync(json).toString())
-		: JSON.parse(json)
-} catch (_) {
-	throw Error(kind + " is an invalid JSON")
-}
-
-addObjectMethods(OBJECT)
-
-const print = getOption(Options.TYPE) 
-	? (x) => process.stdout.write(getTypeOf(x) + "\n") 
-	: getOption(Options.COMPACT_OUTPUT)
-		? (x) => process.stdout.write(getOption(Options.RAW_OUTPUT) 
-			? typeof x == "object" 
-				? util.inspect(x, { compact: true, colors: false, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
-				: x.toString() + "\n"
-			: util.inspect(x, { compact: true, colors: true, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
-		) 
-		: getOption(Options.RAW_OUTPUT) 
-			? (x) => typeof x == "object" 
-				? process.stdout.write(util.inspect(x, null, null, true) + "\n") 
-				: process.stdout.write(x.toString() + "\n") 
-			: (x) => process.stdout.write(util.inspect(x, null, null, true) + "\n") 
-
-if (query === ".") {
-	clearObject(OBJECT)
-	print(OBJECT)
+if (json !== "") {
+	runJSJQ(query, json)
 	process.exit(0)
 }
 
-const result = eval(`OBJECT${query};`)
+process.stdin.on('data', (data) => {
+  json += data.toString();
+});
+process.stdin.on('end', () => {
+  runJSJQ(query, json);
+});
 
-if (result !== undefined) {  
-	clearObject(OBJECT)
-	print(result)
+function runJSJQ(query, json) {
+	const isJsonFile = isValidFilePath(json)
+
+	let OBJECT
+	let kind
+	try {
+		kind = isJsonFile ? "file" : "string"
+		OBJECT = isJsonFile
+			? JSON.parse(fs.readFileSync(json).toString())
+			: JSON.parse(json)
+	} catch (_) {
+		throw Error(kind + " is an invalid JSON")
+	}
+
+	addObjectMethods(OBJECT)
+
+	const print = getOption(Options.TYPE) 
+		? (x) => process.stdout.write(getTypeOf(x) + "\n") 
+		: getOption(Options.COMPACT_OUTPUT)
+			? (x) => process.stdout.write(getOption(Options.RAW_OUTPUT) 
+				? typeof x == "object" 
+					? util.inspect(x, { compact: true, colors: false, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
+					: x.toString() + "\n"
+				: util.inspect(x, { compact: true, colors: true, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
+			) 
+			: getOption(Options.RAW_OUTPUT) 
+				? (x) => typeof x == "object" 
+					? process.stdout.write(util.inspect(x, null, null, true) + "\n") 
+					: process.stdout.write(x.toString() + "\n") 
+				: (x) => process.stdout.write(util.inspect(x, null, null, true) + "\n") 
+
+	if (query === ".") {
+		clearObject(OBJECT)
+		print(OBJECT)
+		process.exit(0)
+	}
+
+	const result = eval(`OBJECT${query};`)
+
+	if (result !== undefined) {  
+		clearObject(OBJECT)
+		print(result)
+	}
 }
 
 function isValidFilePath(filePath) {
