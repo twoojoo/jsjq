@@ -12,7 +12,11 @@ Normal usage:
 ```bash
 npm i -g jsjq 
 
+# from JSON string
 jsjq '.data.map(x => x*2)' '{"data": [1, 2, 3]}'
+
+# from JSON file
+jsjq '.data.map(x => x*2)' example.json
 ```
 
 Pipe usage:
@@ -40,3 +44,9 @@ Options:
 - **-t, --type**			       print the type of the value instead of the value itself;
 - **-v, --version** 		       show the version;
 - **-h, --help**	               show the help;
+
+Code check:
+```bash
+jsjq '.data; process.exit(1)' '{}'
+# will throw an error
+```
