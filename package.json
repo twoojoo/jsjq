@@ -21,6 +21,7 @@
   "license": "ISC",
   "description": "jq with ECMAScript syntax",
   "dependencies": {
-    "arg": "^5.0.2"
+    "arg": "^5.0.2",
+    "safe-eval": "^0.4.1"
   }
 }

@@ -4,6 +4,7 @@ const arg = require('arg');
 const fs = require('node:fs');
 const path = require('node:path');
 const util = require("node:util");
+const safeEval = require('safe-eval')
 
 const Options = {
 	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-methods", Boolean, "disable the usage of custom object methods (prevents object fields override)"],
@@ -49,10 +50,10 @@ if (json !== "") {
 }
 
 process.stdin.on('data', (data) => {
-  json += data.toString();
+	json += data.toString();
 });
 process.stdin.on('end', () => {
-  runJSJQ(query, json);
+	runJSJQ(query, json);
 });
 
 function runJSJQ(query, json) {
@@ -92,7 +93,16 @@ function runJSJQ(query, json) {
 		process.exit(0)
 	}
 
-	const result = eval(`OBJECT${query};`)
+	const code = `OBJECT${query};`
+	
+	let safeCode 
+	try {
+		safeCode = safeEval(code, { OBJECT })
+	} catch (err) {
+		throw Error("detected unsafe code: " + err.message)
+	}
+
+	const result = eval(safeCode)
 
 	if (result !== undefined) {  
 		clearObject(OBJECT)
