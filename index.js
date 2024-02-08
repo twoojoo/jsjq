@@ -65,7 +65,7 @@ const print = getOption(Options.TYPE)
 		? (x) => process.stdout.write(getOption(Options.RAW_OUTPUT) 
 			? typeof x == "object" 
 				? util.inspect(x, { compact: true, colors: false, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
-				: x.toString()
+				: x.toString() + "\n"
 			: util.inspect(x, { compact: true, colors: true, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
 		) 
 		: getOption(Options.RAW_OUTPUT) 
