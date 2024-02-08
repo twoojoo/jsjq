@@ -18,6 +18,7 @@
   ],
   "author": "twoojoo",
   "preferGlobal": true,
+  "repository": "https://github.com/twoojoo/jsjq",
   "license": "ISC",
   "description": "jq with ECMAScript syntax",
   "dependencies": {
