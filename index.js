@@ -8,7 +8,7 @@ const util = require("node:util");
 const Options = {
 	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
 	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
-	TYPE: ["-t", "--type", Boolean, "print the JS type of the value instead of the value itself"],
+	TYPE: ["-t", "--type", Boolean, "print the type of the value instead of the value itself"],
 	VERSION: ["-v", "--version", Boolean, "show the version"],
 	HELP: ["-h", "--help", Boolean, "show the help"]
 }
@@ -56,7 +56,7 @@ try {
 }
 
 const print = getOption(Options.TYPE) 
-	? (x) => process.stdout.write(typeof x + "\n") 
+	? (x) => process.stdout.write(getTypeOf(x) + "\n") 
 	: getOption(Options.COMPACT_OUTPUT)
 		? (x) => process.stdout.write(getOption(Options.RAW_OUTPUT) 
 			? typeof x == "object" 
@@ -112,4 +112,14 @@ function printHelp() {
 		return names.join(", ") + "\t" + desc + ";"
 	}).join("\n\t"))
 
+}
+
+function getTypeOf(x) {
+	const type = typeof x
+
+	if (type == "object" && Array.isArray(x)) {
+		type = "array"
+	} 
+
+	return type
 }
