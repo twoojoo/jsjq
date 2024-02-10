@@ -33,7 +33,7 @@ res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
 check_test
 
 test="object.listEntries()"
-exp="[ [ 'a', 1 ], [ 'b', 2     ], [ 'c', 3 ] ]"
+exp="[ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ] ]"
 res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
 check_test
 
