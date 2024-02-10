@@ -46,7 +46,8 @@ jsjq '.data.compact()' '{ "data": [1, 2, 2, 3] }'
 # output: [ 1, 2, 3 ]
 ```
 
-> NOTE: custom methods are not available for transformed object and array
+NOTE:
+custom methods are not available for transformed objects and arrays
 
 ```bash
 jsjq '.data.map(x => x).compact()' '{ "data": [1, 2, 2, 3] }'
