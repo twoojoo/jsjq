@@ -20,7 +20,6 @@ check_test
 test="object listKeys"
 exp="[ 'a', 'b', 'c' ]"
 res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
-res=$(remove_colors "$res") 
 check_test
 
 test="object listValues"
