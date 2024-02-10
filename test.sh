@@ -1,3 +1,5 @@
+#!/bin/bash
+
 errors=()
 
 remove_colors() {
