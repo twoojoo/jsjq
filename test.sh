@@ -15,6 +15,12 @@ check_test() {
 	fi
 }
 
+check_error_string() {
+	if [ "$1" != "" ]; then
+		errors+=("ERROR at \"$test\": \n\tunexpected error\n")
+	fi
+}
+
 check_test_error() {
 	if [ $? -eq 0 ]; then
 		errors+=("ERROR at \"$test\": \n\texpected exit with error\n")
@@ -91,6 +97,15 @@ exp="[ 1, 2, 3 ]"
 res=$(echo '{ "data": [1, 2, 3] }' | node . '.data')
 check_test
 
+test="from pipe multiple"
+exp="[ 1, 2, 3 ]"
+err=$((
+	echo '{ "data": [1, 2, 3] }'; sleep 1; 
+	echo '{ "data": [1, 2, 3] }'; sleep 1; 
+	echo '{ "data": [1, 2, 3] }'
+) | node . '.data' 2>&1 >/dev/null)
+check_error_string "$err"
+
 test="compact option"
 exp="[['a',1],['b',2],['c',3]]"
 res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -c)
@@ -115,7 +130,6 @@ test="raw option (extended)"
 exp="string"
 res=$(node . '.data' '{ "data": "string" }' --raw-output)
 check_test
-
 
 if [ "${#errors[@]}" -ne "0" ]; then
 	for err in "${errors[@]}"; do

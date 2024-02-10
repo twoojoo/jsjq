@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const util = require("node:util");
 const safeEval = require('safe-eval')
+const { createInterface } = require("node:readline")
 
 const Options = {
 	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-methods", Boolean, "disable the usage of custom methods (prevents fields override)"],
@@ -38,24 +39,37 @@ if (getOption(Options.VERSION)) {
 	process.exit(0)
 }
 
+// parse args
 const query = args._[0]
 let json = args._[1] || ""
 
+// check query
 if (!query) throw Error("missing query argument")
 if (!query.startsWith(".") && !query.startsWith("[")) 
 	throw Error("query must start with either \".\" or \"[\"")
 
+// normal usage
 if (json !== "") {
-	runJSJQ(query, json)
-	process.exit(0)
-}
+	try {
+		runJSJQ(query, json);
+	} catch (err) {
+		console.error("JSJQ error:", err)
+		process.exit(1)
+	}
 
-process.stdin.on('data', (data) => {
-	json += data.toString();
-});
-process.stdin.on('end', () => {
-	runJSJQ(query, json);
-});
+	process.exit(0)
+};
+
+// pipe usage
+(async function () {
+	for await (const json of createInterface({ input: process.stdin })) {
+		try {
+			runJSJQ(query, json);
+		} catch (err) {
+			console.error("JSJQ error:", err)
+		}
+	}
+})();
 
 function runJSJQ(query, json) {
 	const isJsonFile = isValidFilePath(json)
@@ -91,7 +105,7 @@ function runJSJQ(query, json) {
 	if (query === ".") {
 		clearObject(OBJECT)
 		print(OBJECT)
-		process.exit(0)
+		return
 	}
 
 	const code = `OBJECT${query};`
