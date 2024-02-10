@@ -16,7 +16,7 @@ const Options = {
 }
 
 const CUSTOM_OBJ_METHODS_NAMES = ["listValues", "listKeys", "listEntries"]
-// const CUSTOM_ARR_METHODS_NAMES = ["compact"]
+const CUSTOM_ARR_METHODS_NAMES = ["compact"]
 
 const argOptions = Object.values(Options).reduce((opts, o) => {
 	o.slice(undefined, -2).forEach(name => { 
@@ -96,15 +96,8 @@ function runJSJQ(query, json) {
 
 	const code = `OBJECT${query};`
 	
-	let safeCode 
-	try {
-		safeCode = safeEval(code, { OBJECT })
-	} catch (err) {
-		throw Error("detected unsafe code: " + err.message)
-	}
-
-	const result = eval(safeCode)
-
+	const result = safeEval(code, { OBJECT })
+	
 	if (result !== undefined) {  
 		clearObject(OBJECT)
 		print(result)
@@ -208,9 +201,9 @@ function clearObject(obj) {
 	}
 
 	if (Array.isArray(obj)) {
-		// for (const key of CUSTOM_ARR_METHODS_NAMES) {
-		// 	delete obj[key]
-		// }
+		for (const key of CUSTOM_ARR_METHODS_NAMES) {
+			delete obj[key]
+		}
 
 		for (const idx in obj) {
 			clearObject(obj[idx])	
