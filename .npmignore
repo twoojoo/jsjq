@@ -2,3 +2,4 @@ test.json
 test.sh
 .npmrc
 node_modules
+.github
