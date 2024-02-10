@@ -1,7 +1,8 @@
 # jsjq - jq with ECMAScript syntax 
 
 [![npm version](https://img.shields.io/npm/v/jsjq.svg)](https://www.npmjs.com/package/jsjq)
-[![Build Status](https://github.com/twoojoo/jsjq/actions/workflows/npm-publish/badge.svg)](https://github.com/twoojoo/jsjq/actions)
+[![Test Status](https://github.com/twoojoo/jsjq/actions/workflows/test.yml/badge.svg)](https://github.com/twoojoo/jsjq/actions)
+[![Release Status](https://github.com/twoojoo/jsjq/actions/workflows/release.yml/badge.svg)](https://github.com/twoojoo/jsjq/actions)
 
 > it uses **eval()** to run your code, be warned (code is checked using [safe-eval](https://www.npmjs.com/package/safe-eval))
 
