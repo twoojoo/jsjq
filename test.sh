@@ -17,6 +17,11 @@ exp="[ 1, 2, 3 ]"
 res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }')
 check_test
 
+test="disable custom methods - compact"
+exp="[ 1, 2, 3 ]"
+res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }' -m)
+check_test
+
 test="object listKeys"
 exp="[ 'a', 'b', 'c' ]"
 res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
