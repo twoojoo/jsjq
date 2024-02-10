@@ -112,8 +112,14 @@ function isValidFilePath(filePath) {
 	}
 }
 
-function getOption(name) {
-	return args[name[0]]
+function getOption(option) {
+	for (const n of option.slice(undefined, -2)) {
+		if (args[n] !== undefined) {
+			return args[n]
+		}
+	}	
+
+	return false
 }
 
 function printHelp() {

@@ -12,35 +12,48 @@ check_test() {
 	fi
 }
 
+check_test_error() {
+	if [ $? -eq 0 ]; then
+		printf "ERROR at \"$test\": \n\texpected exit with error\n" 
+		exit 1
+	fi
+}
+
 test="array compact"
 exp="[ 1, 2, 3 ]" 
 res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }')
 check_test
 
 test="disable custom methods - compact"
-exp="[ 1, 2, 3 ]"
-res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }' -m)
-check_test
+res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }' --disable-custom-methods &> /dev/null)
+check_test_error
 
 test="object listKeys"
 exp="[ 'a', 'b', 'c' ]"
 res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
 check_test
 
+test="disable custom methods - listKeys"
+res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }' --disable-custom-methods &> /dev/null)
+check_test_error
+
 test="object listValues"
 exp="[ 1, 2, 3 ]"
 res=$(node . '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
 check_test
+
+test="disable custom methods - listValues"
+res=$(node . '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }' --disable-custom-methods &> /dev/null)
+check_test_error
 
 test="object listEntries"
 exp="[ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ] ]"
 res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
 check_test
 
-test="object.listEntries()"
-exp="[ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ] ]"
-res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
-check_test
+test="disable custom methods - listEntries"
+res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' --disable-custom-methods &> /dev/null)
+check_test_error
 
 test="number type"
 exp="number"
