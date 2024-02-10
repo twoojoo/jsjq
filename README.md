@@ -46,6 +46,13 @@ jsjq '.data.compact()' '{ "data": [1, 2, 2, 3] }'
 # output: [ 1, 2, 3 ]
 ```
 
+> NOTE: custom methods are not available for transformed object and array
+
+```bash
+jsjq '.data.map(x => x).compact()' '{ "data": [1, 2, 2, 3] }'
+# will throw an error
+```
+
 Options:
 
 - **-m, --disable-custom-methods** disable the usage of custom methods (prevents fields override);
