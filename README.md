@@ -4,7 +4,7 @@
 [![Test Status](https://github.com/twoojoo/jsjq/actions/workflows/test.yml/badge.svg)](https://github.com/twoojoo/jsjq/actions)
 [![Release Status](https://github.com/twoojoo/jsjq/actions/workflows/release.yml/badge.svg)](https://github.com/twoojoo/jsjq/actions)
 
-> it uses **eval()** to run your code, be warned (code is checked using [safe-eval](https://www.npmjs.com/package/safe-eval))
+> it uses **eval()** to run your code, be warned (code is checked and run using [safe-eval](https://www.npmjs.com/package/safe-eval))
 
 Usage with npx:
 ```bash
