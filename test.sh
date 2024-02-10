@@ -1,3 +1,5 @@
+errors=()
+
 remove_colors() {
     local input="$1"
     local plain_string=$(echo "$input" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
@@ -7,15 +9,13 @@ remove_colors() {
 check_test() {
 	res=$(remove_colors "$res") 
 	if [ "$res" != "$exp" ]; then
-		printf "ERROR at \"$test\": \n\texpected \"$exp\",\n\treceived \"$res\"\n" 
-	 	exit 1; 
+		errors+=("ERROR at \"$test\": \n\texpected \"$exp\",\n\treceived \"$res\"\n")
 	fi
 }
 
 check_test_error() {
 	if [ $? -eq 0 ]; then
-		printf "ERROR at \"$test\": \n\texpected exit with error\n" 
-		exit 1
+		errors+=("ERROR at \"$test\": \n\texpected exit with error\n")
 	fi
 }
 
@@ -25,6 +25,10 @@ res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }')
 check_test
 
 test="disable custom methods - compact"
+res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }' -m &> /dev/null)
+check_test_error
+
+test="disable custom methods (exended) - compact"
 res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }' --disable-custom-methods &> /dev/null)
 check_test_error
 
@@ -34,7 +38,7 @@ res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
 check_test
 
 test="disable custom methods - listKeys"
-res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }' --disable-custom-methods &> /dev/null)
+res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -m &> /dev/null)
 check_test_error
 
 test="object listValues"
@@ -43,7 +47,7 @@ res=$(node . '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
 check_test
 
 test="disable custom methods - listValues"
-res=$(node . '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }' --disable-custom-methods &> /dev/null)
+res=$(node . '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -m &> /dev/null)
 check_test_error
 
 test="object listEntries"
@@ -52,7 +56,7 @@ res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
 check_test
 
 test="disable custom methods - listEntries"
-res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' --disable-custom-methods &> /dev/null)
+res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -m &> /dev/null)
 check_test_error
 
 test="number type"
@@ -84,5 +88,40 @@ test="from pipe"
 exp="[ 1, 2, 3 ]"
 res=$(echo '{ "data": [1, 2, 3] }' | node . '.data')
 check_test
+
+test="compact option"
+exp="[['a',1],['b',2],['c',3]]"
+res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -c)
+check_test
+
+test="compact option extended"
+exp="[['a',1],['b',2],['c',3]]"
+res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' --compact-output)
+check_test
+
+test="no raw option"
+exp="'string'"
+res=$(node . '.data' '{ "data": "string" }')
+check_test
+
+test="raw option"
+exp="string"
+res=$(node . '.data' '{ "data": "string" }' -r)
+check_test
+
+test="raw option (extended)"
+exp="string"
+res=$(node . '.data' '{ "data": "string" }' --raw-output)
+check_test
+
+
+if [ "${#errors[@]}" -ne "0" ]; then
+	for err in "${errors[@]}"; do
+	    printf "$err\n"
+	done
+
+	echo "some test failed!"
+	exit 1
+fi
 
 echo "all tests OK!"
