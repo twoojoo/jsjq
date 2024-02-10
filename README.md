@@ -44,7 +44,7 @@ jsjq '.data.compact()' '{ "data": [1, 2, 2, 3] }'
 
 Options:
 
-- **-m, --disable-custom-object-methods** disable the usage of custom object methods (prevents object fields override);
+- **-m, --disable-custom-methods** disable the usage of custom methods (prevents fields override);
 - **-c, --compact-output**         compact instead of pretty-printed output;
 - **-r, --raw-output**             output strings without escapes and quotes;
 - **-t, --type**			       print the type of the value instead of the value itself;

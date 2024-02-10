@@ -7,7 +7,7 @@ const util = require("node:util");
 const safeEval = require('safe-eval')
 
 const Options = {
-	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-object-methods", Boolean, "disable the usage of custom object methods (prevents object fields override)"],
+	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-methods", Boolean, "disable the usage of custom methods (prevents fields override)"],
 	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
 	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
 	TYPE: ["-t", "--type", Boolean, "print the type of the value instead of the value itself"],
@@ -97,7 +97,7 @@ function runJSJQ(query, json) {
 	const code = `OBJECT${query};`
 	
 	const result = safeEval(code, { OBJECT })
-	
+
 	if (result !== undefined) {  
 		clearObject(OBJECT)
 		print(result)
