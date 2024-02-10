@@ -1,4 +1,4 @@
-# jsjq - jq with ECMAScript syntax
+# jsjq - jq with ECMAScript syntax [![npm version](https://img.shields.io/npm/v/mypackage.svg)](https://www.npmjs.com/package/mypackage)
 
 > it uses **eval()** to run your code, be warned (code is checked using [safe-eval](https://www.npmjs.com/package/safe-eval))
 
