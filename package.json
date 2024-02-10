@@ -5,6 +5,9 @@
   "bin": {
     "jsjq": "index.js"
   },
+  "scripts": {
+    "test": "./test.sh"
+  },
   "keywords": [
     "JSON",
     "jq",

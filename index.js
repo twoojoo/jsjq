@@ -7,7 +7,7 @@ const util = require("node:util");
 const safeEval = require('safe-eval')
 
 const Options = {
-	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-methods", Boolean, "disable the usage of custom object methods (prevents object fields override)"],
+	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-object-methods", Boolean, "disable the usage of custom object methods (prevents object fields override)"],
 	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
 	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
 	TYPE: ["-t", "--type", Boolean, "print the type of the value instead of the value itself"],
@@ -15,7 +15,8 @@ const Options = {
 	HELP: ["-h", "--help", Boolean, "show the help"]
 }
 
-const CUSTOM_METHODS_NAMES = ["listValues", "listKeys", "listEntries"]
+const CUSTOM_OBJ_METHODS_NAMES = ["listValues", "listKeys", "listEntries"]
+// const CUSTOM_ARR_METHODS_NAMES = ["compact"]
 
 const argOptions = Object.values(Options).reduce((opts, o) => {
 	o.slice(undefined, -2).forEach(name => { 
@@ -166,24 +167,29 @@ function addObjectMethods(obj, path = "") {
 
 	if (Array.isArray(obj)) {
 		for (const idx in obj) {
+
+			obj.compact = () => {
+				return Array.from(new Set(obj))
+			}
+
 			const newPath = path + `[${idx}]`
 			addObjectMethods(obj[idx], newPath)	
 		}
 	} else {
 		obj.listKeys = () => {
-			return Object.keys(obj).filter((key) => !CUSTOM_METHODS_NAMES.includes(key))
+			return Object.keys(obj).filter((key) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
 		} 
 
 		obj.listEntries = () => {
-			return Object.entries(obj).filter(([key, _]) => !CUSTOM_METHODS_NAMES.includes(key))
+			return Object.entries(obj).filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
 		} 
 
 		obj.listValues = () => {
-			return Object.entries(obj).filter(([key, _]) => !CUSTOM_METHODS_NAMES.includes(key)).map(([_, val]) => val)
+			return Object.entries(obj).filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key)).map(([_, val]) => val)
 		} 
 		
 		for (const prop in obj) {
-			if (CUSTOM_METHODS_NAMES.includes(prop)) continue
+			if (CUSTOM_OBJ_METHODS_NAMES.includes(prop)) continue
 
 			path += "." + prop
 			addObjectMethods(obj[prop], path)	
@@ -202,11 +208,15 @@ function clearObject(obj) {
 	}
 
 	if (Array.isArray(obj)) {
+		// for (const key of CUSTOM_ARR_METHODS_NAMES) {
+		// 	delete obj[key]
+		// }
+
 		for (const idx in obj) {
 			clearObject(obj[idx])	
 		}
 	} else {
-		for (const key of CUSTOM_METHODS_NAMES) {
+		for (const key of CUSTOM_OBJ_METHODS_NAMES) {
 			delete obj[key]
 		}
 

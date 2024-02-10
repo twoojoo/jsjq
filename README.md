@@ -24,7 +24,7 @@ Pipe usage:
 echo '{"data": [1, 2, 3]}' | jsjq '.data.map(x => x*2)' 
 ```
 
-Custom object methods (see options):
+Custom object methods (may override object fields):
 ```bash
 jsjq '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
 # output: [ 'a', 'b', 'c' ]
@@ -36,9 +36,15 @@ jsjq '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
 # output: [ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ] ]
 ```
 
+Custom array methods:
+```bash
+jsjq '.data.compact()' '{ "data": [1, 2, 2, 3] }'
+# output: [ 1, 2, 3 ]
+```
+
 Options:
 
-- **-m, --disable-custom-methods** disable the usage of custom object methods (prevents object fields override);
+- **-m, --disable-custom-object-methods** disable the usage of custom object methods (prevents object fields override);
 - **-c, --compact-output**         compact instead of pretty-printed output;
 - **-r, --raw-output**             output strings without escapes and quotes;
 - **-t, --type**			       print the type of the value instead of the value itself;
