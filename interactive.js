@@ -41,14 +41,26 @@ const NO_ARGS_METHODS = [
 	"reverse",
 ]
 
+const REQUIRED_ARGS_METHODS = [
+	"every",
+	"filter",
+	"find",
+	"findIndex",
+	"findLast",
+	"findLastIndex",
+	"flatMap",
+	"map",
+	"reduce",
+	"reduceRight",
+	"some",
+]
+
 module.exports = runInteractive
 
-async function runInteractive(OBJECT) {
+async function runInteractive(OBJECT, transformed = false) {
 	let current = OBJECT
 	let path = ""
 	let type
-
-	let transformed = false
 
 	do {
 		const question = {
@@ -80,7 +92,7 @@ async function runInteractive(OBJECT) {
 
 					question.choices.push("[prop] .length")
 				
-					if (!getOption(Options.DISABLE_CUSTOM_METHODS) && !transformed) {
+					if (!getOption(Options.DISABLE_CUSTOM_METHODS) /*&& !transformed*/) {
 						for (const n of CUSTOM_ARR_METHODS_NAMES) {
 							removeFromArray(question.choices, question.choices.find(x => x.startsWith(`${indexPrefix}${n}`)))
 						}
@@ -102,7 +114,7 @@ async function runInteractive(OBJECT) {
 					type = "object"
 					question.choices.push(...Object.entries(current).map(([k, v]) => `${propertyPrefix}${k}${formatKeyContent(v)}`))
 
-					if (!getOption(Options.DISABLE_CUSTOM_METHODS) && !transformed) {
+					if (!getOption(Options.DISABLE_CUSTOM_METHODS)/* && !transformed*/) {
 						for (const n of CUSTOM_OBJ_METHODS_NAMES) {
 							removeFromArray(question.choices, question.choices.find(x => x.startsWith(`${propertyPrefix}${n}`)))
 						}
@@ -169,6 +181,10 @@ async function runFunction(object, name) {
 			message: `${yellowCode}[func]${resetCode} ${name}():`,
 			prefix: ""
 		}]))["jsjq"]
+	}
+
+	if (body == "" && REQUIRED_ARGS_METHODS.includes(name)) {
+		throw Error(`method .${name}() requires arguments`)
 	}
 
 	let fnCall = `.${name}(${body})`

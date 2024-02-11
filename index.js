@@ -38,7 +38,7 @@ if (json !== "") {	// normal usage
 	runJSJQ(query, json)
 		.then(() => process.exit(0))
 		.catch(err => {
-			console.error("JSJQ error:", err)
+			console.error("jsjq error:", err.message)
 			process.exit(1)
 		});
 } else {	// pipe usage
@@ -51,7 +51,7 @@ if (json !== "") {	// normal usage
 			try {
 				await runJSJQ(query, json);
 			} catch (err) {
-				console.error("JSJQ error:", err)
+				console.error("jsjq error:", err.message)
 			}
 		}
 	})();
@@ -98,7 +98,7 @@ async function runJSJQ(query, json) {
 	if (result !== undefined) {  
 		// check interactive mode on
 		if (getOption(Options.INTERACTIVE)) {
-			result = await runInteractive(result)
+			result = await runInteractive(result, true)
 		}
 
 		if (result !== undefined) {
