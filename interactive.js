@@ -64,6 +64,7 @@ async function runInteractive(OBJECT) {
 			case "string":
 				return current
 			case "object":
+				question.choices = ["!exit"]
 				question.choices = ["!print"]
 
 				if (Array.isArray(current)) {
@@ -125,6 +126,7 @@ async function runInteractive(OBJECT) {
 		// check macros
 		if (resp == "!print") return current
 		if (resp == "!length") return current.length
+		if (resp == "!exit") process.exit(0)
 
 		// process choice
 		if (type == "array") {
