@@ -28,7 +28,7 @@ Pipe usage:
 echo '{"data": [1, 2, 3]}' | jsjq '.data.map(x => x*2)' 
 ```
 
-Custom object methods (may override object fields):
+Custom object methods (may override object properties with the same name):
 ```bash
 jsjq '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
 # output: [ 'a', 'b', 'c' ]
@@ -54,7 +54,7 @@ jsjq '.data.stringify()' '{ "data": [1, 2, 2, 3] }'
 
 Options:
 
-- **-m, --disable-custom-methods** disable the usage of custom methods (prevents fields override);
+- **-m, --keep-custom-methods**    keep custom methods even when an object property would get overridden;
 - **-c, --compact-output**         compact instead of pretty-printed output;
 - **-r, --raw-output**             output strings without escapes and quotes;
 - **-i, --interactive** 		   run jsjq in interactive mode (experimental)

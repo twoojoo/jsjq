@@ -8,7 +8,7 @@ const safeEval = require('safe-eval')
 const { createInterface } = require("node:readline");
 
 const { loadArgs, getOption, Options } = require('./options');
-const { addObjectMethods } = require("./custom")
+const { loadCustomMethods } = require("./custom")
 const runInteractive = require('./interactive');
 
 const args = loadArgs()
@@ -33,9 +33,7 @@ if (!query) throw Error("missing query argument")
 if (!query.startsWith(".") && !query.startsWith("[")) 
 	throw Error("query must start with either \".\" or \"[\"")
 
-if (!getOption(Options.DISABLE_CUSTOM_METHODS)) {
-	addObjectMethods()
-}
+loadCustomMethods()
 
 if (json !== "") {	// normal usage
 	runJSJQ(query, json)

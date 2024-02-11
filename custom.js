@@ -1,8 +1,7 @@
 const CUSTOM_OBJ_METHODS_NAMES = ["listValues", "listKeys", "listEntries", "stringify"]
 const CUSTOM_ARR_METHODS_NAMES = ["compact", "stringify"]
 
-/**add custom objet methods*/
-function addObjectMethods() {
+function loadCustomMethods() {
 	Array.prototype.compact = function () {
 		return Array.from(new Set(this))
 	}
@@ -35,5 +34,5 @@ function addObjectMethods() {
 module.exports = {
 	CUSTOM_OBJ_METHODS_NAMES,
 	CUSTOM_ARR_METHODS_NAMES,
-	addObjectMethods
+	loadCustomMethods
 }

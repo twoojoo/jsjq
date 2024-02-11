@@ -92,14 +92,8 @@ async function runInteractive(OBJECT) {
 
 					question.choices.push("[prop] .length")
 				
-					if (!getOption(Options.DISABLE_CUSTOM_METHODS) /*&& !transformed*/) {
-						for (const n of CUSTOM_ARR_METHODS_NAMES) {
-							removeFromArray(question.choices, question.choices.find(x => x.startsWith(`${indexPrefix}${n}`)))
-						}
-
-						for (const n of CUSTOM_ARR_METHODS_NAMES) {
-							question.choices.push(`${funcPrefix}${n}${funcPostfix}`)
-						}
+					for (const n of CUSTOM_ARR_METHODS_NAMES) {
+						question.choices.push(`${funcPrefix}${n}${funcPostfix}`)
 					}
 				} else {
 					if (current === null) {
@@ -107,20 +101,18 @@ async function runInteractive(OBJECT) {
 					}
 
 					//prune custom properties
-					if (Object.keys(current).filter(k => !CUSTOM_OBJ_METHODS_NAMES.includes(k)).length === 0) {
+					if (Object.keys(current).length === 0) {
 						return current
 					}
 
 					type = "object"
 					question.choices.push(...Object.entries(current).map(([k, v]) => `${propertyPrefix}${k}${formatKeyContent(v)}`))
 
-					if (!getOption(Options.DISABLE_CUSTOM_METHODS)/* && !transformed*/) {
+					if (!getOption(Options.KEEP_CUSTOM_METHODS)) {
 						for (const n of CUSTOM_OBJ_METHODS_NAMES) {
-							removeFromArray(question.choices, question.choices.find(x => x.startsWith(`${propertyPrefix}${n}`)))
-						}
-
-						for (const n of CUSTOM_OBJ_METHODS_NAMES) {
-							question.choices.push(`${funcPrefix}${n}${funcPostfix}`)
+							if (!question.choices.find(x => x.startsWith(`${propertyPrefix}${n}`))) {
+								question.choices.push(`${funcPrefix}${n}${funcPostfix}`)
+							}
 						}
 					}
 				}

@@ -3,7 +3,7 @@ const arg = require("arg")
 let args = {}
 
 const Options = {
-	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-methods", Boolean, "disable the usage of custom methods (prevents fields override)"],
+	KEEP_CUSTOM_METHODS: ["-m", "--keep-custom-methods", Boolean, "keep custom methods even when an object property would get overridden"],
 	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
 	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
 	TYPE: ["-t", "--type", Boolean, "print the type of the value instead of the value itself"],
