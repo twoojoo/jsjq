@@ -7,8 +7,8 @@ const util = require("node:util");
 const safeEval = require('safe-eval')
 const { createInterface } = require("node:readline");
 
-const { clearObject, addObjectMethods } = require("./custom")
 const { loadArgs, getOption, Options } = require('./options');
+const { addObjectMethods } = require("./custom")
 const runInteractive = require('./interactive');
 
 const args = loadArgs()
@@ -33,12 +33,15 @@ if (!query) throw Error("missing query argument")
 if (!query.startsWith(".") && !query.startsWith("[")) 
 	throw Error("query must start with either \".\" or \"[\"")
 
+if (!getOption(Options.DISABLE_CUSTOM_METHODS)) {
+	addObjectMethods()
+}
 
 if (json !== "") {	// normal usage
 	runJSJQ(query, json)
 		.then(() => process.exit(0))
 		.catch(err => {
-			console.error("jsjq error:", err.message)
+			console.error("jsjq error:", err)
 			process.exit(1)
 		});
 } else {	// pipe usage
@@ -51,7 +54,7 @@ if (json !== "") {	// normal usage
 			try {
 				await runJSJQ(query, json);
 			} catch (err) {
-				console.error("jsjq error:", err.message)
+				console.error("jsjq error:", err)
 			}
 		}
 	})();
@@ -71,9 +74,6 @@ async function runJSJQ(query, json) {
 		throw Error(kind + " is an invalid JSON")
 	}
 
-	// enrich object with custom methods
-	addObjectMethods(OBJECT)
-
 	// if query is root, just print it
 	if (query === ".") {
 		// check interactive mode on
@@ -82,8 +82,6 @@ async function runJSJQ(query, json) {
 		}
 
 		if (OBJECT !== undefined) {
-			// remoce custom methods and print
-			clearObject(OBJECT)
 			print(OBJECT)
 		}
 	
@@ -98,12 +96,10 @@ async function runJSJQ(query, json) {
 	if (result !== undefined) {  
 		// check interactive mode on
 		if (getOption(Options.INTERACTIVE)) {
-			result = await runInteractive(result, true)
+			result = await runInteractive(result)
 		}
 
 		if (result !== undefined) {
-			// remove custom methods and print
-			clearObject(OBJECT)
 			print(result)
 		}
 	}

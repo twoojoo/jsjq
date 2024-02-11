@@ -57,7 +57,7 @@ const REQUIRED_ARGS_METHODS = [
 
 module.exports = runInteractive
 
-async function runInteractive(OBJECT, transformed = false) {
+async function runInteractive(OBJECT) {
 	let current = OBJECT
 	let path = ""
 	let type
