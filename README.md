@@ -28,7 +28,7 @@ Pipe usage:
 echo '{"data": [1, 2, 3]}' | jsjq '.data.map(x => x*2)' 
 ```
 
-Custom object methods (may override object properties with the same name):
+Custom object methods (may be overridden by properties with the same name):
 ```bash
 jsjq '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
 # output: [ 'a', 'b', 'c' ]
@@ -41,6 +41,10 @@ jsjq '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
 
 jsjq '.data.stringify()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
 # output: '{"a":1,"b":2,"c":3}'
+
+# override:
+jsjq '.data.stringify()' '{ "stringify": 123 }'
+# will throw an error
 ```
 
 Custom array methods:
