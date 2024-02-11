@@ -131,6 +131,11 @@ exp="string"
 res=$(node . '.data' '{ "data": "string" }' --raw-output)
 check_test
 
+test="block interactive mode"
+res=$(echo '{ "data": [1, 2, 3] }' | node . '.' '{}'  -i &> /dev/null)
+check_test_error
+
+
 if [ "${#errors[@]}" -ne "0" ]; then
 	for err in "${errors[@]}"; do
 	    printf "$err\n"

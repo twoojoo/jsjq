@@ -42,6 +42,10 @@ if (json !== "") {	// normal usage
 			process.exit(1)
 		});
 } else {	// pipe usage
+	if (getOption(Options.INTERACTIVE)) {
+		throw Error("can't use interactive mode without a direct input (json file or json string")
+	}
+
 	(async function () {
 		for await (const json of createInterface({ input: process.stdin })) {
 			try {
