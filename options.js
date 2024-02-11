@@ -7,7 +7,7 @@ const Options = {
 	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
 	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
 	TYPE: ["-t", "--type", Boolean, "print the type of the value instead of the value itself"],
-	INTERACTIVE: ["-i", "--interactive", Boolean, "run jsjq in interactive mode"],
+	INTERACTIVE: ["-i", "--interactive", Boolean, "run jsjq in interactive mode (experimental)"],
 	VERSION: ["-v", "--version", Boolean, "show the version"],
 	HELP: ["-h", "--help", Boolean, "show the help"]
 }
