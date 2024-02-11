@@ -6,35 +6,18 @@ const path = require('node:path');
 const util = require("node:util");
 const safeEval = require('safe-eval')
 const { createInterface } = require("node:readline");
+
+const { clearObject, addObjectMethods } = require("./custom")
+const { loadArgs, getOption, Options } = require('./options');
 const runInteractive = require('./interactive');
 
-const Options = {
-	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-methods", Boolean, "disable the usage of custom methods (prevents fields override)"],
-	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
-	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
-	TYPE: ["-t", "--type", Boolean, "print the type of the value instead of the value itself"],
-	INTERACTIVE: ["-i", "--interactive", Boolean, "run jsjq in interactive mode"],
-	VERSION: ["-v", "--version", Boolean, "show the version"],
-	HELP: ["-h", "--help", Boolean, "show the help"]
-}
-
-const CUSTOM_OBJ_METHODS_NAMES = ["listValues", "listKeys", "listEntries"]
-const CUSTOM_ARR_METHODS_NAMES = ["compact"]
-
-const argOptions = Object.values(Options).reduce((opts, o) => {
-	o.slice(undefined, -2).forEach(name => { 
-		const optKind = o[o.length - 2]
-		opts[name] = optKind
-	})
-	return opts
-}, {})
-
-const args = arg(argOptions)
+const args = loadArgs()
 
 if (getOption(Options.HELP)) {
 	printHelp()
 	process.exit(0)
 }
+
 if (getOption(Options.VERSION)) {
 	const pJSON = require(path.join(__dirname, "./package.json"))
 	console.log(pJSON.version)
@@ -51,7 +34,7 @@ if (!query.startsWith(".") && !query.startsWith("["))
 	throw Error("query must start with either \".\" or \"[\"")
 
 
-if (json !== "") {// normal usage
+if (json !== "") {	// normal usage
 	runJSJQ(query, json)
 		.then(() => process.exit(0))
 		.catch(err => {
@@ -84,8 +67,10 @@ async function runJSJQ(query, json) {
 		throw Error(kind + " is an invalid JSON")
 	}
 
+	// enrich object with custom methods
 	addObjectMethods(OBJECT)
 
+	// define print function based on optuons
 	const print = getOption(Options.TYPE) 
 		? (x) => process.stdout.write(getTypeOf(x) + "\n") 
 		: getOption(Options.COMPACT_OUTPUT)
@@ -101,29 +86,38 @@ async function runJSJQ(query, json) {
 					: process.stdout.write(x.toString() + "\n") 
 				: (x) => process.stdout.write(util.inspect(x, null, null, true) + "\n") 
 
+	// if query is root, just print it
 	if (query === ".") {
-		clearObject(OBJECT)
-
+		// check interactive mode on
 		if (getOption(Options.INTERACTIVE)) {
 			OBJECT = await runInteractive(OBJECT)
 		}
 
-		print(OBJECT)
+		if (OBJECT !== undefined) {
+			// remoce custom methods and print
+			clearObject(OBJECT)
+			print(OBJECT)
+		}
+	
 		return
 	}
 
+	// build and run query	
 	const code = `OBJECT${query};`
-	
 	let result = safeEval(code, { OBJECT })
 
+	// process query result
 	if (result !== undefined) {  
-		clearObject(OBJECT)
-
+		// check interactive mode on
 		if (getOption(Options.INTERACTIVE)) {
 			result = await runInteractive(result)
 		}
 
-		print(result)
+		if (result !== undefined) {
+			// remove custom methods and print
+			clearObject(OBJECT)
+			print(result)
+		}
 	}
 }
 
@@ -133,16 +127,6 @@ function isValidFilePath(filePath) {
 	} catch (error) {
 		return false;
 	}
-}
-
-function getOption(option) {
-	for (const n of option.slice(undefined, -2)) {
-		if (args[n] !== undefined) {
-			return args[n]
-		}
-	}	
-
-	return false
 }
 
 function printHelp() {
@@ -175,75 +159,4 @@ function getTypeOf(x) {
 	} 
 
 	return type
-}
-
-/**add custom objet methods*/
-function addObjectMethods(obj, path = "") {
-	if (getOption(Options.DISABLE_CUSTOM_METHODS)) {
-		return
-	}
-
-	if (typeof obj !== "object") {
-		return
-	}
-
-	if (Array.isArray(obj)) {
-		for (const idx in obj) {
-
-			obj.compact = () => {
-				return Array.from(new Set(obj))
-			}
-
-			const newPath = path + `[${idx}]`
-			addObjectMethods(obj[idx], newPath)	
-		}
-	} else {
-		obj.listKeys = () => {
-			return Object.keys(obj).filter((key) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
-		} 
-
-		obj.listEntries = () => {
-			return Object.entries(obj).filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
-		} 
-
-		obj.listValues = () => {
-			return Object.entries(obj).filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key)).map(([_, val]) => val)
-		} 
-		
-		for (const prop in obj) {
-			if (CUSTOM_OBJ_METHODS_NAMES.includes(prop)) continue
-
-			path += "." + prop
-			addObjectMethods(obj[prop], path)	
-		}
-	}
-}
-
-/**cleanup custom methods*/
-function clearObject(obj) {
-	if (getOption(Options.DISABLE_CUSTOM_METHODS)) {
-		return
-	}
-
-	if (typeof obj !== "object") {
-		return
-	}
-
-	if (Array.isArray(obj)) {
-		for (const key of CUSTOM_ARR_METHODS_NAMES) {
-			delete obj[key]
-		}
-
-		for (const idx in obj) {
-			clearObject(obj[idx])	
-		}
-	} else {
-		for (const key of CUSTOM_OBJ_METHODS_NAMES) {
-			delete obj[key]
-		}
-
-		for (const prop in obj) {
-			clearObject(obj[prop])	
-		}
-	} 
 }

@@ -1,6 +1,33 @@
 const interactive = require("inquirer")
 const safeEval = require('safe-eval')
 
+const { Options, getOption } = require("./options")
+const { CUSTOM_ARR_METHODS_NAMES, CUSTOM_OBJ_METHODS_NAMES } = require("./custom")
+
+const grayCode = '\x1b[90m';
+const yellowCode = '\x1b[33m';
+const resetCode = '\x1b[0m';
+
+const funcPrefix = `[func] .`
+const funcPostfix = `()`
+const indexPrefix = `[idx] `
+const propertyPrefix = `[prop] `
+
+const UNAVAILABLE_ARRAY_METHODS = [
+	"entries", // returns an iterator 
+	"toString", // useless
+	"copyWithin", // adds a "costructor" to the array
+	"fill", // adds a "costructor" to the array
+	"pop", // useless
+	"shift", // useless
+	"unshift", // useless
+	"push", // useless
+	"forEach", // useless
+	"values", // returns an iterator 
+	"keys", // returns an iterator 
+	"toLocaleString" //useless
+]
+
 module.exports = runInteractive
 
 async function runInteractive(OBJECT) {
@@ -33,18 +60,52 @@ async function runInteractive(OBJECT) {
 					}
 
 					type = "array"
-					question.choices.push(...Object.keys(current).map(idx => `[idx] ${idx}`))
-					question.choices.push(...Object.getOwnPropertyNames(Array.prototype).map(p => `[fn] ${p}`))
+					question.choices.push(...Object.entries(current).map(([idx, v]) => `${indexPrefix}${idx} ${grayCode}(${v})${resetCode}`))
+					question.choices.push(...Object.getOwnPropertyNames(Array.prototype)
+						.filter(p => !UNAVAILABLE_ARRAY_METHODS.includes(p))
+						.filter(p => p !== "length")
+						.map(p => `${funcPrefix}${p}${funcPostfix}`))
+
+					question.choices.push("!length")
+				
+					if (!getOption(Options.DISABLE_CUSTOM_METHODS)) {
+						for (const n of CUSTOM_ARR_METHODS_NAMES) {
+							removeFromArray(question.choices, question.choices.find(x => x.startsWith(`${indexPrefix}${n}`)))
+						}
+
+						for (const n of CUSTOM_ARR_METHODS_NAMES) {
+							question.choices.push(`${funcPrefix}${n}${funcPostfix}`)
+						}
+					}
 				} else {
+					//prune custom properties
+					if (Object.keys(current).filter(k => !CUSTOM_OBJ_METHODS_NAMES.includes(k)).length === 0) {
+						loop = false
+						continue
+					}
+
 					type = "object"
 					path += "."
-					question.choices.push(...Object.keys(current).map(k => `[prop] ${k}`))
+					question.choices.push(...Object.keys(current).map(k => `${propertyPrefix}${k}`))
+
+					if (!getOption(Options.DISABLE_CUSTOM_METHODS)) {
+						for (const n of CUSTOM_OBJ_METHODS_NAMES) {
+							removeFromArray(question.choices, question.choices.find(x => x.startsWith(`${propertyPrefix}${n}`)))
+						}
+
+						for (const n of CUSTOM_OBJ_METHODS_NAMES) {
+							question.choices.push(`${funcPrefix}${n}${funcPostfix}`)
+						}
+					}
 				}
 
-				question.message = `[${type}] ` + path
-				removeFromArray(question.message, "[fn] constructor")
+				question.message = `${yellowCode}[${type}]${resetCode} ` + path
+				removeFromArray(question.choices, `${funcPrefix}constructor${funcPostfix}`)
 				question.choices.sort()
 				break
+			case "undefined":
+				loop = false
+				continue
 			default:
 				throw Error("unexpected type: " + typeof current)
 		}
@@ -58,44 +119,50 @@ async function runInteractive(OBJECT) {
 			continue
 		}
 
+		if (resp == "!length") {
+			loop = false
+			return current.length
+		}
+
 		// process choice
 		if (type == "array") {
-			if (resp.startsWith("[fn]")) { //array method
-				const fnName = resp.slice("[fn] ".length)
-
-				const { result, fnCall } = await runFunction(current, fnName)
+			if (resp.startsWith(funcPrefix)) { //array method
+				const funcName = pruneChoiceText(resp, funcPrefix, funcPostfix)
+				const { result, fnCall } = await runFunction(current, funcName)
 				current = result
 				path += fnCall
 			} else { // array index
-				const idx = resp.slice("[idx] ".length)
+				const idx = pruneChoiceText(resp, indexPrefix)
 				path += `[${idx}]`
-				current = current[idx]
+				current = current.at(idx)
 			}
 		} else { // object
-			const prop = resp.slice("[prop] ".length)
-			path += `${prop}`
-			current = current[prop]
+			if (resp.startsWith(funcPrefix)) { //object method 
+				const funcName = pruneChoiceText(resp, funcPrefix, funcPostfix)
+				const { result, fnCall } = await runFunction(current, funcName)
+				current = result
+				path += fnCall
+			} else { // object prperty
+				const prop = pruneChoiceText(resp, propertyPrefix)
+				path += `${prop}`
+				current = current[prop]
+			}
 		}
 	} while (loop) 
 
 	return current
 };
 
-// (async function () {
-// 	const result = await runInteractive({
-// 		hello: "world",
-// 		array: [1, 2, 3, { hello: "again" }, "kjfjnsdfjn", false, [1, 2, 3], []]
-// 	})
-
-// 	console.log(result)
-// })();
-
 async function runFunction(object, name) {
 	let body = (await interactive.prompt([{
 		name: "jsjq",
-		message: `[fn] ${name}():`,
+		message: `${yellowCode}[func]${resetCode} ${name}():`,
 		prefix: "jsjq:"
 	}]))["jsjq"]
+
+	if (name.startsWith(".")) {
+		name = name.slice(1)
+	}
 
 	let fnCall = `.${name}(${body})`
 	const code = `OBJECT${fnCall}`
@@ -111,4 +178,20 @@ function removeFromArray(arr, value) {
 	if (index !== -1) {
 		arr.splice(index, 1);
 	}
+}
+
+function pruneChoiceText(choice, prefix, postFix = undefined) {
+	const pIdx = choice.indexOf(`${grayCode}(`)
+
+	if (postFix !== undefined) {
+		choice = choice.slice(undefined, -postFix.length)
+	}
+
+	if (pIdx == -1) {
+		return choice.slice(prefix.length)
+	}
+
+
+
+	return choice.slice(undefined, pIdx).slice(prefix.length)
 }
