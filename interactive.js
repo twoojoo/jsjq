@@ -108,11 +108,9 @@ async function runInteractive(OBJECT) {
 					type = "object"
 					question.choices.push(...Object.entries(current).map(([k, v]) => `${propertyPrefix}${k}${formatKeyContent(v)}`))
 
-					if (!getOption(Options.KEEP_CUSTOM_METHODS)) {
-						for (const n of CUSTOM_OBJ_METHODS_NAMES) {
-							if (!question.choices.find(x => x.startsWith(`${propertyPrefix}${n}`))) {
-								question.choices.push(`${funcPrefix}${n}${funcPostfix}`)
-							}
+					for (const n of CUSTOM_OBJ_METHODS_NAMES) {
+						if (!question.choices.find(x => x.startsWith(`${propertyPrefix}${n}`))) {
+							question.choices.push(`${funcPrefix}${n}${funcPostfix}`)
 						}
 					}
 				}

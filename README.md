@@ -54,7 +54,6 @@ jsjq '.data.stringify()' '{ "data": [1, 2, 2, 3] }'
 
 Options:
 
-- **-m, --keep-custom-methods**    keep custom methods even when an object property would get overridden;
 - **-c, --compact-output**         compact instead of pretty-printed output;
 - **-r, --raw-output**             output strings without escapes and quotes;
 - **-i, --interactive** 		   run jsjq in interactive mode (experimental)
