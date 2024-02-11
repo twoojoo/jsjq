@@ -90,11 +90,15 @@ async function runInteractive(OBJECT) {
 						}
 					}
 				} else {
+					if (current === null) {
+						return null
+					}
+
 					//prune custom properties
 					if (Object.keys(current).filter(k => !CUSTOM_OBJ_METHODS_NAMES.includes(k)).length === 0) {
 						return current
 					}
-					
+
 					type = "object"
 					question.choices.push(...Object.entries(current).map(([k, v]) => `${propertyPrefix}${k}${formatKeyContent(v)}`))
 
