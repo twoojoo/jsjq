@@ -148,7 +148,6 @@ function getTypeOf(x) {
 	return type
 }
 
-
 function print(x) {
 	const raw = getOption(Options.RAW_OUTPUT)
 	const type = getOption(Options.TYPE) 
