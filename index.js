@@ -74,22 +74,6 @@ async function runJSJQ(query, json) {
 	// enrich object with custom methods
 	addObjectMethods(OBJECT)
 
-	// define print function based on optuons
-	const print = getOption(Options.TYPE) 
-		? (x) => process.stdout.write(getTypeOf(x) + "\n") 
-		: getOption(Options.COMPACT_OUTPUT)
-			? (x) => process.stdout.write(getOption(Options.RAW_OUTPUT) 
-				? typeof x == "object" 
-					? util.inspect(x, { compact: true, colors: false, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
-					: x.toString() + "\n"
-				: util.inspect(x, { compact: true, colors: true, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "") + "\n"
-			) 
-			: getOption(Options.RAW_OUTPUT) 
-				? (x) => typeof x == "object" 
-					? process.stdout.write(util.inspect(x, null, null, true) + "\n") 
-					: process.stdout.write(x.toString() + "\n") 
-				: (x) => process.stdout.write(util.inspect(x, null, null, true) + "\n") 
-
 	// if query is root, just print it
 	if (query === ".") {
 		// check interactive mode on
@@ -162,4 +146,36 @@ function getTypeOf(x) {
 	} 
 
 	return type
+}
+
+
+function print(x) {
+	const raw = getOption(Options.RAW_OUTPUT)
+	const type = getOption(Options.TYPE) 
+	const compact = getOption(Options.COMPACT_OUTPUT)
+
+	let out
+
+	if (type) out = getTypeOf(x) 
+	else if (x === null && raw) out = "null"
+	else if (x === null) out = null
+	else if (compact) {
+		if (raw) {
+			if (typeof x == "object") {
+				out = util.inspect(x, { compact: true, colors: false, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "")
+			} else {
+				out = x.toString()
+			}
+		} else out = util.inspect(x, { compact: true, colors: true, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "")
+	} else {
+		if (raw) {
+			if (typeof x == "object") {
+				out = util.inspect(x, null, null, true)
+			} else {
+				out = x.toString()	
+			}
+		} else out = util.inspect(x, null, null, true)
+	}
+
+	process.stdout.write(out + "\n")
 }

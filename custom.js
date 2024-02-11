@@ -9,7 +9,7 @@ function addObjectMethods(obj, path = "") {
 		return
 	}
 
-	if (typeof obj !== "object") {
+	if (typeof obj !== "object" || obj === null) {
 		return
 	}
 
@@ -59,7 +59,7 @@ function clearObject(obj) {
 		return
 	}
 
-	if (typeof obj !== "object" || obj == null) {
+	if (typeof obj !== "object" || obj === null) {
 		return
 	}
 
