@@ -152,9 +152,7 @@ async function runInteractive(OBJECT) {
 				current = current[prop]
 			}
 		}
-	} while (true) 
-
-	return current
+	} while (true)
 };
 
 async function runFunction(object, name) {
