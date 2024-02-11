@@ -16,33 +16,29 @@ function addObjectMethods(obj, path = "") {
 	if (Array.isArray(obj)) {
 		for (const idx in obj) {
 
-			obj.compact = () => {
-				return Array.from(new Set(obj))
-			}
+			obj.compact = () =>  Array.from(new Set(obj))
 
-			obj.stringify = (...args) => {
-				return JSON.stringify(obj, ...args)
-			} 
+			obj.stringify = (...args) => JSON.stringify(obj, ...args)
 
 			const newPath = path + `[${idx}]`
 			addObjectMethods(obj[idx], newPath)	
 		}
 	} else {
-		obj.listKeys = () => {
-			return Object.keys(obj).filter((key) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
-		} 
+		obj.listKeys = () => Object.entries(obj)
+			.filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
+			.filter(([k, v]) => !(k === "constructor" && v === undefined))
+			.map(([key, _]) => key)
 
-		obj.listEntries = () => {
-			return Object.entries(obj).filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
-		} 
+		obj.listEntries = () => Object.entries(obj)
+			.filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
+			.filter(([k, v]) => !(k === "constructor" && v === undefined))
 
-		obj.listValues = () => {
-			return Object.entries(obj).filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key)).map(([_, val]) => val)
-		} 
+		obj.listValues = () => Object.entries(obj)
+			.filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key))
+			.filter(([k, v]) => !(k === "constructor" && v === undefined))
+			.map(([_, val]) => val)
 
-		obj.stringify = (...args) => {
-			return JSON.stringify(obj, ...args)
-		} 
+		obj.stringify = (...args) => JSON.stringify(obj, ...args) 
 		
 		for (const prop in obj) {
 			if (CUSTOM_OBJ_METHODS_NAMES.includes(prop)) continue
