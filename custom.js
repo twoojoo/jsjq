@@ -59,7 +59,7 @@ function clearObject(obj) {
 		return
 	}
 
-	if (typeof obj !== "object") {
+	if (typeof obj !== "object" || obj == null) {
 		return
 	}
 
