@@ -13,6 +13,7 @@ const funcPostfix = `()`
 const indexPrefix = `[idx] `
 const propertyPrefix = `[prop] `
 
+// array methods that are not available in interactive mode
 const UNAVAILABLE_ARRAY_METHODS = [
 	"entries", // returns an iterator 
 	"toString", // useless
@@ -28,6 +29,15 @@ const UNAVAILABLE_ARRAY_METHODS = [
 	"toLocaleString" //useless
 ]
 
+// objects and arrays methods that don't require arguments 
+const NO_ARGS_METHODS = [
+	"listEntries",
+	"listValues",
+	"listKeys",
+	"compact",
+	"reverse"
+]
+
 module.exports = runInteractive
 
 async function runInteractive(OBJECT) {
@@ -36,11 +46,13 @@ async function runInteractive(OBJECT) {
 	let path = ""
 	let type
 
+	let transformed = false
+
 	do {
 		const question = {
 			name: "jsjq",
 			type: "list",
-			prefix: "jsjq:"
+			prefix: ""
 		}
 
 		switch (typeof current) {
@@ -68,7 +80,7 @@ async function runInteractive(OBJECT) {
 
 					question.choices.push("!length")
 				
-					if (!getOption(Options.DISABLE_CUSTOM_METHODS)) {
+					if (!getOption(Options.DISABLE_CUSTOM_METHODS) && !transformed) {
 						for (const n of CUSTOM_ARR_METHODS_NAMES) {
 							removeFromArray(question.choices, question.choices.find(x => x.startsWith(`${indexPrefix}${n}`)))
 						}
@@ -85,10 +97,9 @@ async function runInteractive(OBJECT) {
 					}
 
 					type = "object"
-					path += "."
 					question.choices.push(...Object.entries(current).map(([k, v]) => `${propertyPrefix}${k}${formatKeyContent(v)}`))
 
-					if (!getOption(Options.DISABLE_CUSTOM_METHODS)) {
+					if (!getOption(Options.DISABLE_CUSTOM_METHODS) && !transformed) {
 						for (const n of CUSTOM_OBJ_METHODS_NAMES) {
 							removeFromArray(question.choices, question.choices.find(x => x.startsWith(`${propertyPrefix}${n}`)))
 						}
@@ -113,22 +124,16 @@ async function runInteractive(OBJECT) {
 		// select property/index/function
 		let resp = (await interactive.prompt([question]))["jsjq"]
 
-		// check print macro
-		if (resp == "!print") {
-			loop = false
-			continue
-		}
-
-		if (resp == "!length") {
-			loop = false
-			return current.length
-		}
+		// check macros
+		if (resp == "!print") return current
+		if (resp == "!length") return current.length
 
 		// process choice
 		if (type == "array") {
 			if (resp.startsWith(funcPrefix)) { //array method
 				const funcName = pruneChoiceText(resp, funcPrefix, funcPostfix)
 				const { result, fnCall } = await runFunction(current, funcName)
+				transformed = true
 				current = result
 				path += fnCall
 			} else { // array index
@@ -140,11 +145,12 @@ async function runInteractive(OBJECT) {
 			if (resp.startsWith(funcPrefix)) { //object method 
 				const funcName = pruneChoiceText(resp, funcPrefix, funcPostfix)
 				const { result, fnCall } = await runFunction(current, funcName)
+				transformed = true
 				current = result
 				path += fnCall
 			} else { // object prperty
 				const prop = pruneChoiceText(resp, propertyPrefix)
-				path += `${prop}`
+				path += `.${prop}`
 				current = current[prop]
 			}
 		}
@@ -154,14 +160,14 @@ async function runInteractive(OBJECT) {
 };
 
 async function runFunction(object, name) {
-	let body = (await interactive.prompt([{
-		name: "jsjq",
-		message: `${yellowCode}[func]${resetCode} ${name}():`,
-		prefix: "jsjq:"
-	}]))["jsjq"]
+	let body = ""
 
-	if (name.startsWith(".")) {
-		name = name.slice(1)
+	if (!NO_ARGS_METHODS.includes(name)) {
+		body = (await interactive.prompt([{
+			name: "jsjq",
+			message: `${yellowCode}[func]${resetCode} ${name}():`,
+			prefix: ""
+		}]))["jsjq"]
 	}
 
 	let fnCall = `.${name}(${body})`
