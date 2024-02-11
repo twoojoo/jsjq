@@ -26,7 +26,10 @@ const UNAVAILABLE_ARRAY_METHODS = [
 	"forEach", // useless
 	"values", // returns an iterator 
 	"keys", // returns an iterator 
-	"toLocaleString" //useless
+	"toLocaleString", // useless
+	"toReversed", // useless
+	"toSpliced", // useless
+	"toSorted", // useless
 ]
 
 // objects and arrays methods that don't require arguments 
@@ -35,7 +38,7 @@ const NO_ARGS_METHODS = [
 	"listValues",
 	"listKeys",
 	"compact",
-	"reverse"
+	"reverse",
 ]
 
 module.exports = runInteractive
@@ -214,10 +217,11 @@ function formatKeyContent(content) {
 			c += "…"
 		}
 	} else if (typeof content == "string") {
-		c = content.slice(0, maxLen)
+		c = '"' + content.slice(0, maxLen) + '"'
 
 		if (content.length > maxLen) {
-			c += "…"
+			c.slice(undefined, -1)
+			c += "…\""
 		}
 	} else {
 		c = content
