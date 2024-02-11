@@ -44,7 +44,6 @@ const NO_ARGS_METHODS = [
 module.exports = runInteractive
 
 async function runInteractive(OBJECT) {
-	let loop = true
 	let current = OBJECT
 	let path = ""
 	let type
@@ -63,15 +62,13 @@ async function runInteractive(OBJECT) {
 			case "number":
 			case "boolean":
 			case "string":
-				loop = false // cant go deeper -> !print
-				continue
+				return current
 			case "object":
 				question.choices = ["!print"]
 
 				if (Array.isArray(current)) {
 					if (current.length === 0) {
-						loop = false
-						continue
+						return current
 					}
 
 					type = "array"
@@ -95,8 +92,7 @@ async function runInteractive(OBJECT) {
 				} else {
 					//prune custom properties
 					if (Object.keys(current).filter(k => !CUSTOM_OBJ_METHODS_NAMES.includes(k)).length === 0) {
-						loop = false
-						continue
+						return current
 					}
 
 					type = "object"
@@ -118,8 +114,7 @@ async function runInteractive(OBJECT) {
 				question.choices.sort()
 				break
 			case "undefined":
-				loop = false
-				continue
+				return undefined
 			default:
 				throw Error("unexpected type: " + typeof current)
 		}
@@ -133,13 +128,13 @@ async function runInteractive(OBJECT) {
 
 		// process choice
 		if (type == "array") {
-			if (resp.startsWith(funcPrefix)) { //array method
+			if (resp.startsWith(funcPrefix)) { // is an array method
 				const funcName = pruneChoiceText(resp, funcPrefix, funcPostfix)
 				const { result, fnCall } = await runFunction(current, funcName)
 				transformed = true
 				current = result
 				path += fnCall
-			} else { // array index
+			} else { // is an array index
 				const idx = pruneChoiceText(resp, indexPrefix)
 				path += `[${idx}]`
 				current = current.at(idx)
@@ -151,13 +146,13 @@ async function runInteractive(OBJECT) {
 				transformed = true
 				current = result
 				path += fnCall
-			} else { // object prperty
+			} else { // is an object property
 				const prop = pruneChoiceText(resp, propertyPrefix)
 				path += `.${prop}`
 				current = current[prop]
 			}
 		}
-	} while (loop) 
+	} while (true) 
 
 	return current
 };
