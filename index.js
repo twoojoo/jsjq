@@ -5,13 +5,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 const util = require("node:util");
 const safeEval = require('safe-eval')
-const { createInterface } = require("node:readline")
+const { createInterface } = require("node:readline");
+const runInteractive = require('./interactive');
 
 const Options = {
 	DISABLE_CUSTOM_METHODS: ["-m", "--disable-custom-methods", Boolean, "disable the usage of custom methods (prevents fields override)"],
 	COMPACT_OUTPUT: ["-c", "--compact-output", Boolean, "compact instead of pretty-printed output"],
 	RAW_OUTPUT: ["-r", "--raw-output", Boolean, "output strings without escapes and quotes"],
 	TYPE: ["-t", "--type", Boolean, "print the type of the value instead of the value itself"],
+	INTERACTIVE: ["-i", "--interactive", Boolean, "run jsjq in interactive mode"],
 	VERSION: ["-v", "--version", Boolean, "show the version"],
 	HELP: ["-h", "--help", Boolean, "show the help"]
 }
@@ -48,30 +50,27 @@ if (!query) throw Error("missing query argument")
 if (!query.startsWith(".") && !query.startsWith("[")) 
 	throw Error("query must start with either \".\" or \"[\"")
 
-// normal usage
-if (json !== "") {
-	try {
-		runJSJQ(query, json);
-	} catch (err) {
-		console.error("JSJQ error:", err)
-		process.exit(1)
-	}
 
-	process.exit(0)
-};
-
-// pipe usage
-(async function () {
-	for await (const json of createInterface({ input: process.stdin })) {
-		try {
-			runJSJQ(query, json);
-		} catch (err) {
+if (json !== "") {// normal usage
+	runJSJQ(query, json)
+		.then(() => process.exit(0))
+		.catch(err => {
 			console.error("JSJQ error:", err)
+			process.exit(1)
+		});
+} else {	// pipe usage
+	(async function () {
+		for await (const json of createInterface({ input: process.stdin })) {
+			try {
+				await runJSJQ(query, json);
+			} catch (err) {
+				console.error("JSJQ error:", err)
+			}
 		}
-	}
-})();
+	})();
+}
 
-function runJSJQ(query, json) {
+async function runJSJQ(query, json) {
 	const isJsonFile = isValidFilePath(json)
 
 	let OBJECT
@@ -104,16 +103,26 @@ function runJSJQ(query, json) {
 
 	if (query === ".") {
 		clearObject(OBJECT)
+
+		if (getOption(Options.INTERACTIVE)) {
+			OBJECT = await runInteractive(OBJECT)
+		}
+
 		print(OBJECT)
 		return
 	}
 
 	const code = `OBJECT${query};`
 	
-	const result = safeEval(code, { OBJECT })
+	let result = safeEval(code, { OBJECT })
 
 	if (result !== undefined) {  
 		clearObject(OBJECT)
+
+		if (getOption(Options.INTERACTIVE)) {
+			result = await runInteractive(result)
+		}
+
 		print(result)
 	}
 }

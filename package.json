@@ -26,6 +26,7 @@
   "description": "jq with ECMAScript syntax",
   "dependencies": {
     "arg": "^5.0.2",
+    "inquirer": "^8.2.6",
     "safe-eval": "^0.4.1"
   }
 }
