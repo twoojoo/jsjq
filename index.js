@@ -91,7 +91,11 @@ async function runJSJQ(query, json) {
 	}
 
 	// build and run query	
-	const code = `OBJECT${query};`
+	const code = `(function() {
+		if (OBJECT === null) return null
+	 	else return OBJECT${query};
+	})()`
+
 	let result = safeEval(code, { OBJECT })
 
 	// process query result
