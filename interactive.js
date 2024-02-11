@@ -64,8 +64,7 @@ async function runInteractive(OBJECT) {
 			case "string":
 				return current
 			case "object":
-				question.choices = ["!exit"]
-				question.choices = ["!print"]
+				question.choices = ["!exit", "!print"]
 
 				if (Array.isArray(current)) {
 					if (current.length === 0) {
@@ -79,7 +78,7 @@ async function runInteractive(OBJECT) {
 						.filter(p => p !== "length")
 						.map(p => `${funcPrefix}${p}${funcPostfix}`))
 
-					question.choices.push("!length")
+					question.choices.push("[prop] .length")
 				
 					if (!getOption(Options.DISABLE_CUSTOM_METHODS) && !transformed) {
 						for (const n of CUSTOM_ARR_METHODS_NAMES) {
@@ -124,8 +123,8 @@ async function runInteractive(OBJECT) {
 		let resp = (await interactive.prompt([question]))["jsjq"]
 
 		// check macros
+		if (resp == "[prop] .length") return current.length
 		if (resp == "!print") return current
-		if (resp == "!length") return current.length
 		if (resp == "!exit") process.exit(0)
 
 		// process choice

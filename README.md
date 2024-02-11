@@ -38,12 +38,18 @@ jsjq '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
 
 jsjq '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
 # output: [ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ] ]
+
+jsjq '.data.stringify()' '{ "data": {"a": 1, "b": 2, "c": 3} }'
+# output: '{"a":1,"b":2,"c":3}'
 ```
 
 Custom array methods:
 ```bash
 jsjq '.data.compact()' '{ "data": [1, 2, 2, 3] }'
 # output: [ 1, 2, 3 ]
+
+jsjq '.data.stringify()' '{ "data": [1, 2, 2, 3] }'
+# output '[1,2,2,3]'
 ```
 
 NOTE:

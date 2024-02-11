@@ -1,7 +1,7 @@
 const { getOption, Options } = require("./options")
 
-const CUSTOM_OBJ_METHODS_NAMES = ["listValues", "listKeys", "listEntries"]
-const CUSTOM_ARR_METHODS_NAMES = ["compact"]
+const CUSTOM_OBJ_METHODS_NAMES = ["listValues", "listKeys", "listEntries", "stringify"]
+const CUSTOM_ARR_METHODS_NAMES = ["compact", "stringify"]
 
 /**add custom objet methods*/
 function addObjectMethods(obj, path = "") {
@@ -20,6 +20,10 @@ function addObjectMethods(obj, path = "") {
 				return Array.from(new Set(obj))
 			}
 
+			obj.stringify = (...args) => {
+				return JSON.stringify(obj, ...args)
+			} 
+
 			const newPath = path + `[${idx}]`
 			addObjectMethods(obj[idx], newPath)	
 		}
@@ -34,6 +38,10 @@ function addObjectMethods(obj, path = "") {
 
 		obj.listValues = () => {
 			return Object.entries(obj).filter(([key, _]) => !CUSTOM_OBJ_METHODS_NAMES.includes(key)).map(([_, val]) => val)
+		} 
+
+		obj.stringify = (...args) => {
+			return JSON.stringify(obj, ...args)
 		} 
 		
 		for (const prop in obj) {
