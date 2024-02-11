@@ -151,7 +151,6 @@ function printHelp() {
 		const desc = x[x.length - 1]
 		return names.join(", ") + "\t" + desc + ";"
 	}).join("\n\t"))
-
 }
 
 /**add array to the set of types*/

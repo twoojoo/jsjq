@@ -4,7 +4,7 @@ const safeEval = require('safe-eval')
 const { Options, getOption } = require("./options")
 const { CUSTOM_ARR_METHODS_NAMES, CUSTOM_OBJ_METHODS_NAMES } = require("./custom")
 
-const grayCode = '\x1b[90m';
+const grayCode = ' \x1b[90m'; //keep space at the beginning
 const yellowCode = '\x1b[33m';
 const resetCode = '\x1b[0m';
 
@@ -60,7 +60,7 @@ async function runInteractive(OBJECT) {
 					}
 
 					type = "array"
-					question.choices.push(...Object.entries(current).map(([idx, v]) => `${indexPrefix}${idx} ${grayCode}(${v})${resetCode}`))
+					question.choices.push(...Object.entries(current).map(([idx, v]) => `${indexPrefix}${idx}${formatKeyContent(v)}`))
 					question.choices.push(...Object.getOwnPropertyNames(Array.prototype)
 						.filter(p => !UNAVAILABLE_ARRAY_METHODS.includes(p))
 						.filter(p => p !== "length")
@@ -86,7 +86,7 @@ async function runInteractive(OBJECT) {
 
 					type = "object"
 					path += "."
-					question.choices.push(...Object.keys(current).map(k => `${propertyPrefix}${k}`))
+					question.choices.push(...Object.entries(current).map(([k, v]) => `${propertyPrefix}${k}${formatKeyContent(v)}`))
 
 					if (!getOption(Options.DISABLE_CUSTOM_METHODS)) {
 						for (const n of CUSTOM_OBJ_METHODS_NAMES) {
@@ -181,7 +181,7 @@ function removeFromArray(arr, value) {
 }
 
 function pruneChoiceText(choice, prefix, postFix = undefined) {
-	const pIdx = choice.indexOf(`${grayCode}(`)
+	const pIdx = choice.indexOf(`${grayCode}`)
 
 	if (postFix !== undefined) {
 		choice = choice.slice(undefined, -postFix.length)
@@ -191,7 +191,31 @@ function pruneChoiceText(choice, prefix, postFix = undefined) {
 		return choice.slice(prefix.length)
 	}
 
-
-
 	return choice.slice(undefined, pIdx).slice(prefix.length)
+}
+
+function formatKeyContent(content) {
+	let c
+
+	const maxLen = 30
+
+	if (typeof content == "object") {
+		const stringified = JSON.stringify(content)
+
+		c = stringified.slice(0, maxLen)
+
+		if (stringified.length > maxLen) {
+			c += "…"
+		}
+	} else if (typeof content == "string") {
+		c = content.slice(0, maxLen)
+
+		if (content.length > maxLen) {
+			c += "…"
+		}
+	} else {
+		c = content
+	}
+
+	return `${grayCode}${c}${resetCode}`
 }
