@@ -1,4 +1,4 @@
-#!/bin/node
+#!/usr/bin/env node
 
 const arg = require('arg');
 const fs = require('node:fs');
