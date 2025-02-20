@@ -25,13 +25,18 @@ if (getOption(Options.VERSION)) {
 }
 
 // parse args
-const query = args._[0]
+let query = args._[0] 
+if (query === "") query = "."
+
 let json = args._[1] || ""
 
-// check query
-if (!query) throw Error("missing query argument")
-if (!query.startsWith(".") && !query.startsWith("[")) 
-	throw Error("query must start with either \".\" or \"[\"")
+if (query === undefined || query === null) {
+	error("missing query argument")
+}
+
+if (!query.startsWith(".") && !query.startsWith("[")) {
+	error("query must start with either \".\" or \"[\"")
+}
 
 loadCustomMethods()
 
@@ -39,12 +44,13 @@ if (json !== "") {	// normal usage
 	runJSJQ(query, json)
 		.then(() => process.exit(0))
 		.catch(err => {
-			console.error("jsjq error:", err)
+			error(err)
 			process.exit(1)
 		});
 } else {	// pipe usage
 	if (getOption(Options.INTERACTIVE)) {
-		throw Error("can't use interactive mode without a direct input (json file or json string")
+		error("can't use interactive mode without a direct input (json file or json string)")
+		process.exit(1)
 	}
 
 	(async function () {
@@ -52,7 +58,7 @@ if (json !== "") {	// normal usage
 			try {
 				await runJSJQ(query, json);
 			} catch (err) {
-				console.error("jsjq error:", err)
+				error("jsjq error:", err)
 			}
 		}
 	})();
@@ -155,20 +161,25 @@ function print(x) {
 	else if (compact) {
 		if (raw) {
 			if (typeof x == "object") {
-				out = util.inspect(x, { compact: true, colors: false, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "")
+				out = JSON.stringify(x)
 			} else {
 				out = x.toString()
 			}
-		} else out = util.inspect(x, { compact: true, colors: true, depth: null }).replace(/(\s|\r\n|\n|\r)/gm, "")
+		} else out = JSON.stringify(x)
 	} else {
 		if (raw) {
 			if (typeof x == "object") {
-				out = util.inspect(x, null, null, true)
+				out = JSON.stringify(x, null, 2)
 			} else {
 				out = x.toString()	
 			}
-		} else out = util.inspect(x, null, null, true)
+		} else out = JSON.stringify(x, null, 2)
 	}
 
 	process.stdout.write(out + "\n")
+}
+
+function error(msg) {
+	console.error("jsjq error:", msg)
+	process.exit(1)
 }
