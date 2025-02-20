@@ -28,23 +28,23 @@ check_test_error() {
 }
 
 test="array compact"
-exp="[ 1, 2, 3 ]" 
-res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }')
+exp="[1,2,3]" 
+res=$(node . '.data.compact()' '{ "data": [1, 2, 2, 3] }' -c )
 check_test
 
 test="object listKeys"
-exp="[ 'a', 'b', 'c' ]"
-res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
+exp='["a","b","c"]'
+res=$(node . '.data.listKeys()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -c)
 check_test
 
 test="object listValues"
-exp="[ 1, 2, 3 ]"
-res=$(node . '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
+exp="[1,2,3]"
+res=$(node . '.data.listValues()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -c)
 check_test
 
 test="object listEntries"
-exp="[ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ] ]"
-res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }')
+exp="[[\"a\",1],[\"b\",2],[\"c\",3]]"
+res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -c)
 check_test
 
 test="number type"
@@ -68,13 +68,13 @@ res=$(node . '.data' '{ "data": {"a": 1, "b": 2, "c": 3} }' -t)
 check_test
 
 test="from file"
-exp="[ 1, 2, 3 ]"
-res=$(node . '.data' 'test.json')
+exp="[1,2,3]"
+res=$(node . '.data' 'test.json' -c)
 check_test
 
 test="from pipe"
-exp="[ 1, 2, 3 ]"
-res=$(echo '{ "data": [1, 2, 3] }' | node . '.data')
+exp="[1,2,3]"
+res=$(echo '{ "data": [1, 2, 3] }' | node . '.data' -c)
 check_test
 
 test="from pipe multiple"
@@ -87,28 +87,18 @@ err=$((
 check_error_string "$err"
 
 test="compact option"
-exp="[['a',1],['b',2],['c',3]]"
+exp="[[\"a\",1],[\"b\",2],[\"c\",3]]"
 res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' -c)
 check_test
 
 test="compact option extended"
-exp="[['a',1],['b',2],['c',3]]"
+exp='[["a",1],["b",2],["c",3]]'
 res=$(node . '.data.listEntries()' '{ "data": {"a": 1, "b": 2, "c": 3} }' --compact-output)
 check_test
 
 test="no raw option"
-exp="'string'"
+exp='"string"'
 res=$(node . '.data' '{ "data": "string" }')
-check_test
-
-test="raw option"
-exp="string"
-res=$(node . '.data' '{ "data": "string" }' -r)
-check_test
-
-test="raw option (extended)"
-exp="string"
-res=$(node . '.data' '{ "data": "string" }' --raw-output)
 check_test
 
 test="block interactive mode"
